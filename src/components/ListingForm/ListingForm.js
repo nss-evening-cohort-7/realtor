@@ -1,6 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import firebase from 'firebase';
 
+import authRequests from '../../firebaseRequests/auth';
+
+import Auth from '../Auth/Auth';
 import './ListingForm.css';
 
 const defaultListing = {
@@ -28,6 +32,11 @@ class ListingForm extends React.Component {
 
   state = {
     newListing: defaultListing,
+    authed: false,
+  }
+
+  isAuthenticated = () => {
+    this.setState({authed: true});
   }
 
   formFieldStringState = (name, e) => {
@@ -131,11 +140,39 @@ class ListingForm extends React.Component {
 
   }
 
+  componentDidMount () {
+    this.removeListener = firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        this.setState({
+          authed: true,
+        });
+      } else {
+        this.setState({
+          authed: false,
+        });
+      }
+    });
+  }
+
+  componentWillUnmount () {
+    this.removeListener();
+  }
+
   render () {
     const { newListing } = this.state;
+    if (!this.state.authed) {
+      return (
+        <Auth isAuthenticated={this.isAuthenticated}/>
+      );
+    }
+    const logoutClickEvent = () => {
+      authRequests.logoutUser();
+      this.setState({authed: false});
+    };
     return (
       <div className="col-xs-8 col-xs-offset-2">
         <h2 className="text-center">Submit new property:</h2>
+        <button onClick={logoutClickEvent} className="btn btn-danger">Logout</button>
         <form onSubmit={this.formSubmit}>
           <div className="row">
             <fieldset className="col-xs-3">

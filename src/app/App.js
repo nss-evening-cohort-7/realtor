@@ -9,6 +9,9 @@ import ListingForm from '../components/ListingForm/ListingForm';
 
 import './App.css';
 
+import fbConection from '../firebaseRequests/connection';
+fbConection();
+
 class App extends Component {
   state = {
     listings: [],
